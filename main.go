@@ -19,6 +19,11 @@ func main() {
 			description: "Lists every command available in the program",
 			callback:    commandHelp,
 		},
+		"search": {
+			name:        "search",
+			description: "Searches a user and shows their overall soloq statistics",
+			callbackS:   commandSearch,
+		},
 	}
 
 	scanner := bufio.NewScanner(os.Stdin)
@@ -41,10 +46,6 @@ func main() {
 			fmt.Fprintln(os.Stderr, err)
 		}
 
-		if len(input) > 1 {
-			fmt.Println("No current command supports more than one arguments...")
-		}
-
 		switch len(input) {
 		case 1:
 			v, ok := commandMap[input[0]]
@@ -54,6 +55,17 @@ func main() {
 			}
 			if input[0] == v.name {
 				commandMap[v.name].callback()
+			} else {
+				fmt.Println("Command does not exist..")
+			}
+		case 4:
+			v, ok := commandMap[input[0]]
+			if !ok {
+				fmt.Println("Command does not exist..")
+				continue
+			}
+			if input[0] == v.name {
+				commandMap[v.name].callbackS(input[1], input[2], input[3])
 			} else {
 				fmt.Println("Command does not exist..")
 			}
