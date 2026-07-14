@@ -1,15 +1,23 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"log"
+	"net/http"
 	"os"
+
+	leagueapi "github.com/UnbreakablePotato/leagueStatsCLI/internal/leagueAPI"
+	"github.com/joho/godotenv"
 )
 
 type command struct {
 	name        string
 	description string
 	callback    func() error
+	callbackS   func(region string, gamename string, tag string) error
 }
 
 var commandMap map[string]command
@@ -30,5 +38,66 @@ func commandHelp() error {
 	for k, v := range commandMap {
 		fmt.Printf("%s: %s\n", k, v.description)
 	}
+	return nil
+}
+
+/*
+example input for searching for profile
+
+search region gamename tag
+*/
+
+func commandSearch(region string, gamename string, tag string) error {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	leagueapi.SearchPuuid(region, gamename, tag)
+
+	apiKey, check := os.LookupEnv("leagueAPI")
+	if !check {
+		fmt.Println("Cannot find apikey")
+	}
+
+	fullurl := "https://euw1.api.riotgames.com/lol/league/v4/entries/by-puuid/" + leagueapi.Usr.Puuid + "?api_key=" + apiKey
+
+	res, err := http.Get(fullurl)
+	if err != nil {
+		fmt.Printf("Search request failed: %v\n", err)
+		return err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		fmt.Printf("Status code is not OK in commandSearch function: %v\n", res.StatusCode)
+		return errors.New("Status code is not OK")
+	}
+
+	defer res.Body.Close()
+
+	data, err := io.ReadAll(res.Body)
+	if err != nil {
+		fmt.Printf("[]byte translation failed: %v\n", err)
+		return err
+	}
+
+	if err := json.Unmarshal(data, &leagueapi.ShallowStats); err != nil {
+		fmt.Printf("Unmarshal failed: %v\n", err)
+		return err
+	}
+
+	winRate := 0
+
+	fmt.Printf("Showing ranked statistics for: %s\n", leagueapi.Usr.GameName)
+	fmt.Printf("  - Rank: %s %s\n", leagueapi.ShallowStats[0].Tier, leagueapi.ShallowStats[0].Rank)
+	fmt.Printf("  - LP: %d\n", leagueapi.ShallowStats[0].LeaguePoints)
+	fmt.Printf("  - Wins: %d\n", leagueapi.ShallowStats[0].Wins)
+	fmt.Printf("  - Losses: %d\n", leagueapi.ShallowStats[0].Losses)
+	if leagueapi.ShallowStats[0].Wins > 0 || leagueapi.ShallowStats[0].Losses > 0 {
+		winRate = int((leagueapi.ShallowStats[0].Wins / (leagueapi.ShallowStats[0].Wins + leagueapi.ShallowStats[0].Losses)) * 100)
+	}
+	if winRate > 0 {
+		fmt.Printf("  - Winrate: %d%%\n", winRate)
+	}
+
 	return nil
 }
