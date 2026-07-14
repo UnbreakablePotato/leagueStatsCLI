@@ -95,9 +95,8 @@ func commandSearch(region string, gamename string, tag string) error {
 	if leagueapi.ShallowStats[0].Wins > 0 || leagueapi.ShallowStats[0].Losses > 0 {
 		winRate = int((leagueapi.ShallowStats[0].Wins / (leagueapi.ShallowStats[0].Wins + leagueapi.ShallowStats[0].Losses)) * 100)
 	}
-	if winRate > 0 {
-		fmt.Printf("  - Winrate: %d%%\n", winRate)
-	}
+
+	fmt.Printf("  - Winrate: %d%%\n", winRate)
 
 	return nil
 }
