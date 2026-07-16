@@ -1,15 +1,17 @@
 package leagueapi
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"os"
 	"strings"
 
 	"github.com/joho/godotenv"
 )
+
+var Champions = make(map[int64]string)
 
 type ShallowMatch struct {
 	Info struct {
@@ -24,17 +26,30 @@ type ShallowMatch struct {
 type DeepMatch struct {
 }
 
+type CurrentGameInfo struct {
+	GameId             int64  `json:"gameId"`
+	GameType           string `json:"gameType"`
+	GameStartTime      int64  `json:"gameStartTime"`
+	PlatformId         string `json:"platformId"`
+	GameQeueueConfigId int    `json:"gameQueueConfigId"`
+	BannedChampions    struct {
+		PickTurn   int   `json:"pickTurn"`
+		ChampionId int64 `json:"championId"`
+		TeamId     int64 `json:"teamId"`
+	} `json:"bannedChampions"`
+	Participants struct {
+		Puuid      string `json:"puuid"`
+		ChampionId int64  `json:"championId"`
+		Spell1Id   int64  `json:"spell1Id"`
+		Spell2Id   int64  `json:"spell2Id"`
+	} `json:"participants"`
+}
+
+var _ = godotenv.Load()
+
+var apiKey, _ = os.LookupEnv("leagueAPI")
+
 func SearcMatchID(region string, puuid string) []string {
-
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
-	apiKey, check := os.LookupEnv("leagueAPI")
-	if !check {
-		fmt.Println("Cannot find apikey")
-	}
 
 	switch region {
 	case "euw":
@@ -78,3 +93,39 @@ func ShowShallowMatch(matchIds []string) {
 func ShowDeepMatch(matchId string) {
 
 }
+
+var LiveGameInfo CurrentGameInfo
+
+// Avoid caching here. Whether or not the game is currently going could change any
+// second, so caching the info is wasteful
+func CheckCurrentGameInfo() bool {
+	region := ""
+	switch Usr.Region {
+	case "euw1":
+		region = "europe"
+	}
+
+	fullUrl := "https://" + region + ".api.riotgames.com/lol/spectator/v5/active-games/by-summoner/" + Usr.Puuid
+
+	res, err := http.Get(fullUrl)
+	if err != nil {
+		fmt.Printf("Get request failed to show current game: %v\n", err)
+		return false
+	}
+
+	defer res.Body.Close()
+
+	data, err := io.ReadAll(res.Body)
+	if err != nil {
+		fmt.Printf("Byte translation failed when attempting to show current game info: %v\n", err)
+		return false
+	}
+
+	if err := json.Unmarshal(data, &LiveGameInfo); err != nil {
+		fmt.Printf("Failed to unmarshal current game info: %v", err)
+	}
+
+	return true
+}
+
+//https://euw1.api.riotgames.com/lol/spectator/v5/active-games/by-summoner/
