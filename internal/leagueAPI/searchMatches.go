@@ -52,12 +52,12 @@ type CurrentGameInfo struct {
 	GameStartTime      int64  `json:"gameStartTime"`
 	PlatformId         string `json:"platformId"`
 	GameQeueueConfigId int    `json:"gameQueueConfigId"`
-	BannedChampions    struct {
+	BannedChampions    []struct {
 		PickTurn   int   `json:"pickTurn"`
 		ChampionId int64 `json:"championId"`
 		TeamId     int64 `json:"teamId"`
 	} `json:"bannedChampions"`
-	Participants struct {
+	Participants []struct {
 		Puuid      string `json:"puuid"`
 		ChampionId int64  `json:"championId"`
 		Spell1Id   int64  `json:"spell1Id"`
