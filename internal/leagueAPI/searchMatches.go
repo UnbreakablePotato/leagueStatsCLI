@@ -13,6 +13,8 @@ import (
 
 var Champions = make(map[int64]string)
 
+var Items = make(map[int]string)
+
 type ShallowMatch struct {
 	Info struct {
 		GameDuration int `json:"gameDuration"`
@@ -24,6 +26,24 @@ type ShallowMatch struct {
 }
 
 type DeepMatch struct {
+	Info struct {
+		GameDuration int `json:"gameDuration"`
+		Participants struct {
+			ChampLevel         int    `json:"champLevel"`
+			ChampionName       string `json:"championName"`
+			Deaths             int    `json:"deaths"`
+			Kills              int    `json:"kills"`
+			GoldEarned         int64  `json:"goldEarned"`
+			IndividualPosition string `json:"individualPosition"`
+			Item0              int    `json:"item0"`
+			Item1              int    `json:"item1"`
+			Item2              int    `json:"item2"`
+			Item3              int    `json:"item3"`
+			Item4              int    `json:"item4"`
+			Item5              int    `json:"item5"`
+			Item6              int    `json:"item6"`
+		} `json:"participants"`
+	} `json:"info"`
 }
 
 type CurrentGameInfo struct {
@@ -113,6 +133,11 @@ func CheckCurrentGameInfo() bool {
 		return false
 	}
 
+	if res.StatusCode != http.StatusOK {
+		fmt.Printf("Status code is not OK: %d\n", res.StatusCode)
+		return false
+	}
+
 	defer res.Body.Close()
 
 	data, err := io.ReadAll(res.Body)
@@ -123,6 +148,7 @@ func CheckCurrentGameInfo() bool {
 
 	if err := json.Unmarshal(data, &LiveGameInfo); err != nil {
 		fmt.Printf("Failed to unmarshal current game info: %v", err)
+		return false
 	}
 
 	return true
