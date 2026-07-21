@@ -61,8 +61,8 @@ func (cache *Cache) reapLoop(interval time.Duration) {
 	ticker := time.NewTicker(interval)
 
 	for range ticker.C {
+		cache.mu.Lock()
 		for k, v := range cache.entries {
-			cache.mu.Lock()
 			startTime := time.Since(v.CreatedAt)
 			if startTime > interval {
 				delete(cache.entries, k)
