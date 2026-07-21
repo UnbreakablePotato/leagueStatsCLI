@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/UnbreakablePotato/leagueStatsCLI/internal/leagueMath"
 	"github.com/joho/godotenv"
 )
 
@@ -18,7 +19,8 @@ var Items = make(map[int]string)
 
 type ShallowMatch struct {
 	Info struct {
-		GameDuration int `json:"gameDuration"`
+		GameDuration int    `json:"gameDuration"`
+		GameMode     string `json:"gameMode"`
 		Participants []struct {
 			ChampLevel   int    `json:"champLevel"`
 			ChampionName string `json:"championName"`
@@ -31,14 +33,15 @@ type ShallowMatch struct {
 
 type DeepMatch struct {
 	Info struct {
-		GameDuration int `json:"gameDuration"`
+		GameDuration int    `json:"gameDuration"`
+		GameMode     string `json:"gameMode"`
 		Participants []struct {
 			ChampLevel         int    `json:"champLevel"`
 			ChampionName       string `json:"championName"`
 			Deaths             int    `json:"deaths"`
 			Kills              int    `json:"kills"`
 			Assists            int    `json:"assists"`
-			GoldEarned         int64  `json:"goldEarned"`
+			GoldEarned         int    `json:"goldEarned"`
 			IndividualPosition string `json:"individualPosition"`
 			Item0              int    `json:"item0"`
 			Item1              int    `json:"item1"`
@@ -47,6 +50,9 @@ type DeepMatch struct {
 			Item4              int    `json:"item4"`
 			Item5              int    `json:"item5"`
 			Item6              int    `json:"item6"`
+			TotalMinionsKilled int    `json:"totalMinionsKilled"`
+			Spell1Id           int64  `json:"spell1Id"`
+			Spell2Id           int64  `json:"spell2Id"`
 		} `json:"participants"`
 	} `json:"info"`
 }
@@ -149,47 +155,116 @@ func ShowShallowMatch(matchIds []string) error {
 			return errors.New("")
 		}
 
-		fmt.Println("-----------------------------------------------")
-		fmt.Print("-----------------------------------------------\n\n")
+		if shallow.Info.GameMode == "CLASSIC" {
 
-		fmt.Printf("MATCHID: %s\n\n", id)
+			fmt.Println("-----------------------------------------------")
+			fmt.Print("-----------------------------------------------\n\n")
 
-		fmt.Printf("%s ---------------------------------------- %s\n", shallow.Info.Participants[0].ChampionName, shallow.Info.Participants[5].ChampionName)
+			fmt.Printf("MATCHID: %s\n\n", id)
 
-		fmt.Printf("K: %d D: %d A: %d ---- K: %d D: %d A: %d\n\n", shallow.Info.Participants[0].Kills, shallow.Info.Participants[0].Deaths, shallow.Info.Participants[0].Assists,
-			shallow.Info.Participants[5].Kills, shallow.Info.Participants[5].Deaths, shallow.Info.Participants[5].Assists)
+			fmt.Printf("%s ---------------------------------------- %s\n", shallow.Info.Participants[0].ChampionName, shallow.Info.Participants[5].ChampionName)
 
-		fmt.Printf("%s ---------------------------------------- %s\n", shallow.Info.Participants[1].ChampionName, shallow.Info.Participants[6].ChampionName)
+			fmt.Printf("K: %d D: %d A: %d ---- K: %d D: %d A: %d\n\n", shallow.Info.Participants[0].Kills, shallow.Info.Participants[0].Deaths, shallow.Info.Participants[0].Assists,
+				shallow.Info.Participants[5].Kills, shallow.Info.Participants[5].Deaths, shallow.Info.Participants[5].Assists)
 
-		fmt.Printf("K: %d D: %d A: %d ---- K: %d D: %d A: %d\n\n", shallow.Info.Participants[1].Kills, shallow.Info.Participants[1].Deaths, shallow.Info.Participants[1].Assists,
-			shallow.Info.Participants[6].Kills, shallow.Info.Participants[6].Deaths, shallow.Info.Participants[6].Assists)
+			fmt.Printf("%s ---------------------------------------- %s\n", shallow.Info.Participants[1].ChampionName, shallow.Info.Participants[6].ChampionName)
 
-		fmt.Printf("%s ---------------------------------------- %s\n", shallow.Info.Participants[2].ChampionName, shallow.Info.Participants[7].ChampionName)
+			fmt.Printf("K: %d D: %d A: %d ---- K: %d D: %d A: %d\n\n", shallow.Info.Participants[1].Kills, shallow.Info.Participants[1].Deaths, shallow.Info.Participants[1].Assists,
+				shallow.Info.Participants[6].Kills, shallow.Info.Participants[6].Deaths, shallow.Info.Participants[6].Assists)
 
-		fmt.Printf("K: %d D: %d A: %d ---- K: %d D: %d A: %d\n\n", shallow.Info.Participants[2].Kills, shallow.Info.Participants[2].Deaths, shallow.Info.Participants[2].Assists,
-			shallow.Info.Participants[7].Kills, shallow.Info.Participants[7].Deaths, shallow.Info.Participants[7].Assists)
+			fmt.Printf("%s ---------------------------------------- %s\n", shallow.Info.Participants[2].ChampionName, shallow.Info.Participants[7].ChampionName)
 
-		fmt.Printf("%s ---------------------------------------- %s\n", shallow.Info.Participants[3].ChampionName, shallow.Info.Participants[8].ChampionName)
+			fmt.Printf("K: %d D: %d A: %d ---- K: %d D: %d A: %d\n\n", shallow.Info.Participants[2].Kills, shallow.Info.Participants[2].Deaths, shallow.Info.Participants[2].Assists,
+				shallow.Info.Participants[7].Kills, shallow.Info.Participants[7].Deaths, shallow.Info.Participants[7].Assists)
 
-		fmt.Printf("K: %d D: %d A: %d ---- K: %d D: %d A: %d\n\n", shallow.Info.Participants[3].Kills, shallow.Info.Participants[3].Deaths, shallow.Info.Participants[3].Assists,
-			shallow.Info.Participants[8].Kills, shallow.Info.Participants[8].Deaths, shallow.Info.Participants[8].Assists)
+			fmt.Printf("%s ---------------------------------------- %s\n", shallow.Info.Participants[3].ChampionName, shallow.Info.Participants[8].ChampionName)
 
-		fmt.Printf("%s ---------------------------------------- %s\n", shallow.Info.Participants[4].ChampionName, shallow.Info.Participants[9].ChampionName)
+			fmt.Printf("K: %d D: %d A: %d ---- K: %d D: %d A: %d\n\n", shallow.Info.Participants[3].Kills, shallow.Info.Participants[3].Deaths, shallow.Info.Participants[3].Assists,
+				shallow.Info.Participants[8].Kills, shallow.Info.Participants[8].Deaths, shallow.Info.Participants[8].Assists)
 
-		fmt.Printf("K: %d D: %d A: %d ---- K: %d D: %d A: %d\n", shallow.Info.Participants[4].Kills, shallow.Info.Participants[4].Deaths, shallow.Info.Participants[4].Assists,
-			shallow.Info.Participants[9].Kills, shallow.Info.Participants[9].Deaths, shallow.Info.Participants[9].Assists)
+			fmt.Printf("%s ---------------------------------------- %s\n", shallow.Info.Participants[4].ChampionName, shallow.Info.Participants[9].ChampionName)
 
-		fmt.Println("-----------------------------------------------")
-		fmt.Print("-----------------------------------------------\n\n")
+			fmt.Printf("K: %d D: %d A: %d ---- K: %d D: %d A: %d\n", shallow.Info.Participants[4].Kills, shallow.Info.Participants[4].Deaths, shallow.Info.Participants[4].Assists,
+				shallow.Info.Participants[9].Kills, shallow.Info.Participants[9].Deaths, shallow.Info.Participants[9].Assists)
+
+			fmt.Println("-----------------------------------------------")
+			fmt.Print("-----------------------------------------------\n\n")
+
+		}
 
 	}
 
 	return nil
 }
 
-func ShowDeepMatch(matchId string) {
+/*
+TODO:
+print deep match statistics neatly
+*/
 
+var deep DeepMatch
+
+func ShowDeepMatch(matchId string) error {
+
+	fullUrl := "https://" + Usr.Region + ".api.riotgames.com/lol/match/v5/matches" + matchId + "?api_key=" + apiKey
+
+	res, err := http.Get(fullUrl)
+	if err != nil {
+		fmt.Printf("Get rquest failed when requesting match id: %s, error: %v", matchId, err)
+		return errors.New("")
+
+	}
+
+	if res.StatusCode != http.StatusOK {
+		fmt.Printf("Status code is not OK: %d\n", res.StatusCode)
+		return errors.New("")
+	}
+
+	defer res.Body.Close()
+
+	data, err := io.ReadAll(res.Body)
+	if err != nil {
+		fmt.Printf("io.ReadAll failed in ShowDeepFunction: %v", err)
+		return errors.New("")
+	}
+
+	if err := json.Unmarshal(data, &deep); err != nil {
+		fmt.Printf("Unmarshal failed in ShowDeepMatch: %v", err)
+		return errors.New("")
+	}
+
+	/*
+		TODO:
+			player
+			Champion, Level, Score,
+			Items
+			Total DMG done,
+			kill participation, CS/m, GPM
+
+	*/
+	for i := range deep.Info.Participants {
+
+		cspm := leagueMath.CSPerMin(deep.Info.Participants[i].TotalMinionsKilled, deep.Info.GameDuration)
+		kp := leagueMath.KillParticipation(deep.Info.Participants[i].Kills, deep.Info.Participants[i].Assists)
+		gpm := leagueMath.GoldPerMin(deep.Info.Participants[i].GoldEarned, deep.Info.GameDuration)
+
+		fmt.Printf("%s %d\n", deep.Info.Participants[i].ChampionName, deep.Info.Participants[i].ChampLevel)
+		fmt.Printf("%d %d\n", deep.Info.Participants[i].Spell1Id, deep.Info.Participants[i].Spell2Id)
+		fmt.Printf("Score: K: %d D: %d A: %d CS/m: %f.1 KP: %f.1 GPM: %f.1\n", deep.Info.Participants[i].Kills, deep.Info.Participants[i].Deaths, deep.Info.Participants[i].Assists, cspm, kp, gpm)
+		//print total dmg and dmg pr min here
+		fmt.Printf("%d\n", deep.Info.Participants[i].Item0)
+		fmt.Printf("%d\n", deep.Info.Participants[i].Item1)
+		fmt.Printf("%d\n", deep.Info.Participants[i].Item2)
+		fmt.Printf("%d\n", deep.Info.Participants[i].Item3)
+		fmt.Printf("%d\n", deep.Info.Participants[i].Item4)
+		fmt.Printf("%d\n", deep.Info.Participants[i].Item5)
+		fmt.Printf("%d\n", deep.Info.Participants[i].Item6)
+	}
+
+	return nil
 }
+
+//https://europe.api.riotgames.com/lol/match/v5/matches/EUW1_7924073698?api_key=
 
 var LiveGameInfo CurrentGameInfo
 
