@@ -76,10 +76,10 @@ var apiKey, _ = os.LookupEnv("leagueAPI")
 
 func SearcMatchID(region string, puuid string) []string {
 
-	switch region {
+	/*switch region {
 	case "euw":
 		region = "europe"
-	}
+	}*/
 
 	fullUrl := "https://" + region + ".api.riotgames.com/lol/match/v5/matches/by-puuid/" + puuid + "/ids?start=0&count=5&api_key=" + apiKey
 	//fmt.Printf("%s\n", fullUrl)
