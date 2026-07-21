@@ -116,5 +116,11 @@ func commandSearch(region string, gamename string, tag string) error {
 		fmt.Printf("  - Winrate: %d%%\n", int(winRate))
 	}
 
+	matchIds := leagueapi.SearcMatchID(leagueapi.Usr.Region, leagueapi.Usr.Puuid)
+
+	if err := leagueapi.ShowShallowMatch(matchIds); err != nil {
+		fmt.Printf("Could not show matches: %v\n", err)
+	}
+
 	return nil
 }
