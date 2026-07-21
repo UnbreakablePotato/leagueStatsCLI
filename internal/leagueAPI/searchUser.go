@@ -48,7 +48,7 @@ func SearchPuuid(region string, gamename string, tagline string) error {
 
 	switch region {
 	case "euw":
-		region = "europe"
+		Usr.Region = "europe"
 	}
 
 	fullId := gamename + tagline
@@ -64,7 +64,7 @@ func SearchPuuid(region string, gamename string, tagline string) error {
 		if !check {
 			fmt.Println("Cannot find apikey")
 		}
-		fullurl := "https://" + region + ".api.riotgames.com/riot/account/v1/accounts/by-riot-id/" + safeGameName + "/" + safeTagLine + "?api_key=" + apiKey
+		fullurl := "https://" + Usr.Region + ".api.riotgames.com/riot/account/v1/accounts/by-riot-id/" + safeGameName + "/" + safeTagLine + "?api_key=" + apiKey
 		//fmt.Printf("%s\n", fullurl)
 
 		res, err := http.Get(fullurl)
