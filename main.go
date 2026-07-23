@@ -24,6 +24,11 @@ func main() {
 			description: "Searches a user and shows their overall soloq statistics",
 			callbackS:   commandSearch,
 		},
+		"import": {
+			name:         "import",
+			description:  "Imports a runepage",
+			callBackRune: commandImportRunePage,
+		},
 	}
 
 	scanner := bufio.NewScanner(os.Stdin)
@@ -66,6 +71,17 @@ func main() {
 			}
 			if input[0] == v.name {
 				commandMap[v.name].callbackS(input[1], input[2], input[3])
+			} else {
+				fmt.Println("Command does not exist..")
+			}
+		case 13:
+			v, ok := commandMap[input[0]]
+			if !ok {
+				fmt.Println("Command does not exist..")
+				continue
+			}
+			if input[0] == v.name {
+				commandMap[v.name].callBackRune(input[1], input[2], input[3], input[4], input[5], input[6], input[7], input[8], input[9], input[10], input[11], input[12])
 			} else {
 				fmt.Println("Command does not exist..")
 			}

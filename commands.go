@@ -8,17 +8,21 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 
+	lcu "github.com/UnbreakablePotato/leagueStatsCLI/internal/LCU"
 	"github.com/UnbreakablePotato/leagueStatsCLI/internal/cache"
 	leagueapi "github.com/UnbreakablePotato/leagueStatsCLI/internal/leagueAPI"
 	"github.com/joho/godotenv"
 )
 
 type command struct {
-	name        string
-	description string
-	callback    func() error
-	callbackS   func(region string, gamename string, tag string) error
+	name         string
+	description  string
+	callback     func() error
+	callbackS    func(region string, gamename string, tag string) error
+	callBackRune func(name string, primarystyle string, substyle string, perks1 string, perk2 string, perk3 string,
+		perk4 string, perks5 string, perk6 string, perk7 string, perk8 string, perk9 string) error
 }
 
 var commandMap map[string]command
@@ -120,6 +124,58 @@ func commandSearch(region string, gamename string, tag string) error {
 
 	if err := leagueapi.ShowShallowMatch(matchIds); err != nil {
 		fmt.Printf("Could not show matches: %v\n", err)
+	}
+
+	return nil
+}
+
+func commandImportRunePage(name string, primarystyle string, substyle string, perks1 string, perks2 string, perks3 string,
+	perks4 string, perks5 string, perks6 string, perks7 string, perks8 string, perks9 string) error {
+
+	pstyle, err := strconv.Atoi(primarystyle)
+	if err != nil {
+		return err
+	}
+
+	sstyle, err := strconv.Atoi(substyle)
+	if err != nil {
+		return err
+	}
+
+	perk1, _ := strconv.Atoi(perks1)
+	perk2, _ := strconv.Atoi(perks2)
+	perk3, _ := strconv.Atoi(perks3)
+	perk4, _ := strconv.Atoi(perks4)
+	perk5, _ := strconv.Atoi(perks5)
+	perk6, _ := strconv.Atoi(perks6)
+	perk7, _ := strconv.Atoi(perks7)
+	perk8, _ := strconv.Atoi(perks8)
+	perk9, _ := strconv.Atoi(perks9)
+
+	perksNums := []int{}
+
+	perksNums = append(perksNums, perk1)
+	perksNums = append(perksNums, perk2)
+	perksNums = append(perksNums, perk3)
+	perksNums = append(perksNums, perk4)
+	perksNums = append(perksNums, perk5)
+	perksNums = append(perksNums, perk6)
+	perksNums = append(perksNums, perk7)
+	perksNums = append(perksNums, perk8)
+	perksNums = append(perksNums, perk9)
+
+	importedPage := lcu.Runepage{
+		Name:             name,
+		PrimaryStyleId:   pstyle,
+		SubStyleId:       sstyle,
+		SelectedPerksIds: perksNums,
+		Current:          lcu.IsCurr,
+	}
+
+	runeerr := lcu.PostRunePage(&importedPage)
+	if runeerr != nil {
+		fmt.Printf("Could not post rune page in func commandImportRunePage: %v\n", err)
+		return err
 	}
 
 	return nil
