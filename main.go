@@ -29,6 +29,11 @@ func main() {
 			description:  "Imports a runepage",
 			callBackRune: commandImportRunePage,
 		},
+		"csmtest": {
+			name:        "csmtest",
+			description: "tests the server",
+			callback:    commandTestServer,
+		},
 	}
 
 	scanner := bufio.NewScanner(os.Stdin)
