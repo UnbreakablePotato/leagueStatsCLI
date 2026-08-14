@@ -10,6 +10,7 @@ import (
 	"os"
 	"strconv"
 
+	csmapi "github.com/UnbreakablePotato/leagueStatsCLI/internal/CSMApi"
 	lcu "github.com/UnbreakablePotato/leagueStatsCLI/internal/LCU"
 	"github.com/UnbreakablePotato/leagueStatsCLI/internal/cache"
 	leagueapi "github.com/UnbreakablePotato/leagueStatsCLI/internal/leagueAPI"
@@ -177,6 +178,40 @@ func commandImportRunePage(name string, primarystyle string, substyle string, pe
 		fmt.Printf("Could not post rune page in func commandImportRunePage: %v\n", err)
 		return err
 	}
+
+	return nil
+}
+
+var testcsm csmapi.Champion
+
+func commandTestServer() error {
+	fullUrl := "http://localhost:8080/champions/teemo/build"
+	req, err := http.NewRequest("GET", fullUrl, nil)
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+		return err
+	}
+
+	client := http.Client{}
+
+	res, err := client.Do(req)
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+		return err
+	}
+
+	data, err := io.ReadAll(res.Body)
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+		return err
+	}
+
+	if err := json.Unmarshal(data, &testcsm); err != nil {
+		fmt.Printf("Error: %s\n", err)
+		return err
+	}
+
+	fmt.Printf("Success: %s\n", testcsm.ChampionIcon)
 
 	return nil
 }
