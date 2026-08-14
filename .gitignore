@@ -1,2 +1,5 @@
 /.env
 /internal/leagueAPI/.env
+/.opencode
+/.github
+/opencode.json
