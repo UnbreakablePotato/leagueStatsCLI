@@ -4,6 +4,8 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+
+	csmapi "github.com/UnbreakablePotato/leagueStatsCLI/internal/CSMApi"
 )
 
 func main() {
@@ -21,7 +23,7 @@ func main() {
 		},
 		"search": {
 			name:        "search",
-			description: "Searches a user and shows their overall soloq statistics",
+			description: "Searches a user and shows their overall soloq statisticsnExample usage: \"search <region> <gamename> <tagline>\"",
 			callbackS:   commandSearch,
 		},
 		"import": {
@@ -29,12 +31,24 @@ func main() {
 			description:  "Imports a runepage",
 			callBackRune: commandImportRunePage,
 		},
+		"setspell": {
+			name:        "setspell",
+			description: "Sets summoner spell.\nExample usage \"setspell <spellID1> <spellID2>\"",
+			callback:    nil,
+		},
 		"csmtest": {
 			name:        "csmtest",
 			description: "tests the server",
 			callback:    commandTestServer,
 		},
+		"build": {
+			name:          "build",
+			description:   "Shows the highest wr build of a champion\nExample usage\"build <champion> <position> \"",
+			callbackBuild: commandBuild,
+		},
 	}
+
+	var b csmapi.Build
 
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
@@ -67,6 +81,15 @@ func main() {
 				commandMap[v.name].callback()
 			} else {
 				fmt.Println("Command does not exist..")
+			}
+		case 3:
+			v, ok := commandMap[input[0]]
+			if !ok {
+				fmt.Println("Command does not exist..")
+				continue
+			}
+			if input[0] == v.name {
+				commandMap[v.name].callbackBuild(b, input[1], input[2])
 			}
 		case 4:
 			v, ok := commandMap[input[0]]

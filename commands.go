@@ -24,6 +24,7 @@ type command struct {
 	callbackS    func(region string, gamename string, tag string) error
 	callBackRune func(name string, primarystyle string, substyle string, perks1 string, perk2 string, perk3 string,
 		perk4 string, perks5 string, perk6 string, perk7 string, perk8 string, perk9 string) error
+	callbackBuild func(b csmapi.Build, name string, position string) error
 }
 
 var commandMap map[string]command
@@ -212,6 +213,27 @@ func commandTestServer() error {
 	}
 
 	fmt.Printf("Success: %s\n", testcsm.ChampionIcon)
+
+	return nil
+}
+
+func commandBuild(b csmapi.Build, name string, position string) error {
+	fullUrl := "http://localhost:8080/champions/" + name + "/" + position + "build"
+
+	Build, err := csmapi.BuildReq(fullUrl, &b)
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+	}
+
+	fmt.Printf("%s : %s\n", Build.ChampionName, Build.Position)
+	fmt.Printf("Summoner spells: %d : %d\n", Build.SummonerSpell1, Build.SummonerSpell2)
+	fmt.Printf("%d -------- %d\n", Build.Item0, Build.Keystone)
+	fmt.Printf("%d -------- %d\n", Build.Item1, Build.Perk1)
+	fmt.Printf("%d -------- %d\n", Build.Item2, Build.Perk2)
+	fmt.Printf("%d -------- %d\n", Build.Item3, Build.Perk3)
+	fmt.Printf("%d -------- %d\n", Build.Item4, Build.Perk4)
+	fmt.Printf("%d -------- %d\n", Build.Item5, Build.Perk5)
+	fmt.Printf("%d -------- %d\n", Build.Item6, Build.Perk6)
 
 	return nil
 }
